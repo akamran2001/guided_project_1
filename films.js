@@ -1,8 +1,8 @@
+const root = document.getElementById("root");
 const urlParams = new URLSearchParams(window.location.search);
 const filmId = urlParams.get("id");
 
 function renderList(renderList, listName) {
-  const root = document.getElementById("root");
   root.innerHTML += `<h1>${listName.toUpperCase()}</h1>`;
   let ul = document.createElement("ul");
   renderList.forEach((element) => {
@@ -16,27 +16,51 @@ function renderList(renderList, listName) {
   root.appendChild(ul);
 }
 
-fetch(`https://swapi2.azurewebsites.net/api/films/${filmId}`)
-  .then((response) => response.json())
-  .then((response) => {
-    const film = response;
-    fetch(`https://swapi2.azurewebsites.net/api/films/${filmId}/characters`)
-      .then((response) => response.json())
-      .then((response) => {
-        const characters = response;
-        fetch(`https://swapi2.azurewebsites.net/api/films/${filmId}/planets`)
-          .then((response) => response.json())
-          .then((response) => {
-            const planets = response;
-            console.log(film);
-            console.log(characters);
-            console.log(planets);
+if (filmId) {
+  fetch(`https://swapi2.azurewebsites.net/api/films/${filmId}`)
+    .then((response) => response.json())
+    .then((response) => {
+      const film = response;
 
-            renderList(characters, "characters");
-            renderList(planets, "planets");
-          });
+      document.getElementById(
+        "root"
+      ).innerHTML += `<h1> Episode ${film.episode_id} - ${film.title} </h1>`;
+
+      fetch(`https://swapi2.azurewebsites.net/api/films/${filmId}/characters`)
+        .then((response) => response.json())
+        .then((response) => {
+          const characters = response;
+          fetch(`https://swapi2.azurewebsites.net/api/films/${filmId}/planets`)
+            .then((response) => response.json())
+            .then((response) => {
+              const planets = response;
+              console.log(film);
+              console.log(characters);
+              console.log(planets);
+
+              renderList(characters, "characters");
+              renderList(planets, "planets");
+            });
+        });
+    })
+    .catch((error) => {
+      console.log(`Error: ${error}`);
+    });
+} else {
+  fetch(`https://swapi2.azurewebsites.net/api/films`)
+    .then((response) => response.json())
+    .then((response) => {
+      const films = response;
+      console.log(films);
+
+      let ul = document.createElement("ul");
+      films.forEach((element) => {
+        let li = document.createElement("li");
+
+        li.innerHTML = `<a href="?id=${element.id}">${element.title}</a>`;
+
+        ul.appendChild(li);
       });
-  })
-  .catch((error) => {
-    console.log(`Error: ${error}`);
-  });
+      root.appendChild(ul);
+    });
+}
