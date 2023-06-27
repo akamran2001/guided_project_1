@@ -1,1 +1,1 @@
-"# guided_project_1" 
+# guided_project_1
